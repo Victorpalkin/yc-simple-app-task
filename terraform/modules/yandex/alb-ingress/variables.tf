@@ -8,14 +8,20 @@ variable "folder_id" {
   description = "(Required) The id of the folder for the resources to be deployed to"
 }
 
-variable "cluster_endpoint" {
-  
+variable "vpc_network_id" {
+  type = string
+  description = "(Required) The ID of the VPC network to be used"
 }
 
-variable "cluster_ca_certificate" {
-  
+variable "static_ip_zone_id" {
+  type = string
+  description = "(Required) The ID the zone for static IP allocation"
 }
 
 variable "cluster_id"{
+    
+}
+
+variable "cluster_name"{
     
 }

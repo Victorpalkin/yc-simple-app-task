@@ -37,3 +37,8 @@ variable "k8s_version" {
   default = "1.23"
 }
 
+variable "domain" {
+  type = string
+  description = "(Required) The domain registered for the application. Should be delegated to Yandex"
+}
+

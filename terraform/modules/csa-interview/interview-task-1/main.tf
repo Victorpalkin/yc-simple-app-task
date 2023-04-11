@@ -32,49 +32,38 @@ module "network" {
     ]
 }
 
-# module "k8s_cluster" {
-#     source = "../../yandex/kubernetes-cluster"
-    
-#     environment = var.environment
-#     folder_id = var.folder_id
-
-#     vpc_network_id = module.network.vpc_network_id
-#     master_subnets = module.network.subnets
-
-#     node_subnets = module.network.subnets
-# }
-
-
-module "managed_instance_group_1" {
-    source = "../../yandex/managed-instance-group"
+module "k8s_cluster" {
+    source = "../../yandex/kubernetes-cluster"
     
     environment = var.environment
     folder_id = var.folder_id
 
     vpc_network_id = module.network.vpc_network_id
-    subnets = module.network.subnets
+    master_subnets = module.network.subnets
 
-    group_name = "demo-group-1"
-    
+    node_subnets = module.network.subnets
 }
-# module "registry" {
-#   source = "../../yandex/container-registry"
 
-#   registry_name = "demo-registry"
-#   environment = var.environment
-#   folder_id = var.folder_id
-# }
+module "registry" {
+  source = "../../yandex/container-registry"
 
-# module "alb_ingress" {
-#   source = "../../yandex/alb-ingress"
+  registry_name = "demo-registry"
+  environment = var.environment
+  folder_id = var.folder_id
+}
 
-#   environment = var.environment
-#   folder_id = var.folder_id
+module "alb_ingress" {
+  source = "../../yandex/alb-ingress"
 
-#   cluster_endpoint = module.k8s_cluster.cluster_endpoint
-#   cluster_ca_certificate = module.k8s_cluster.ca_certificate
-#   cluster_id = module.k8s_cluster.cluster_id
-# }
+  environment = var.environment
+  folder_id = var.folder_id
+
+  vpc_network_id = module.network.vpc_network_id
+  cluster_id = module.k8s_cluster.cluster_id
+  cluster_name = module.k8s_cluster.cluster_name
+
+  static_ip_zone_id = module.network.subnets[0].zone
+}
 
 # module "mysql_cluster" {
 #     source = "../../yandex/managed-mysql"
@@ -85,3 +74,31 @@ module "managed_instance_group_1" {
 #     app_name = "interview03"
 #     hosts_subnets = slice(module.network.subnets,0,2)
 # }
+
+
+module "dns"{
+  source = "../../yandex/cloud-dns"
+
+  environment = var.environment
+  folder_id = var.folder_id
+
+  domain = var.domain
+
+  records = [{
+    name = "@"
+    data = [ module.alb_ingress.external_ip ]
+    ttl = 200
+    type = "A"
+  }]
+}
+
+data "template_file" "k8s" {
+  template = "${file("${path.module}/k8stemplate.yml")}"
+
+  vars = {
+    subnet_ids = join(",", module.network.subnets.*.id)
+    security_group_ids = join(",", [ module.k8s_cluster.cluster_security_group_id, module.alb_ingress.security_group_id ])
+    external_ip_adress  = module.alb_ingress.external_ip
+    host = "${var.domain}"
+  }
+}

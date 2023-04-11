@@ -21,6 +21,19 @@ resource "yandex_vpc_network" "network" {
   labels = module.labels.labels
 }
 
+resource "yandex_vpc_gateway" "egress-gateway" {
+  name = "egress-gateway"
+  shared_egress_gateway {}
+}
+
+resource "yandex_vpc_route_table" "default" {
+  network_id = yandex_vpc_network.network.id
+
+  static_route {
+    destination_prefix = "0.0.0.0/0"
+    gateway_id         = yandex_vpc_gateway.egress-gateway.id
+  }
+}
 
 resource "yandex_vpc_subnet" "subnet" {
   count = length(var.subnets)

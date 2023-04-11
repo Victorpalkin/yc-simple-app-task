@@ -14,12 +14,14 @@ module "labels" {
     environment = var.environment
 }
 
-resource "yandex_kubernetes_cluster" "k8s-regional" {
+resource "yandex_kubernetes_cluster" "k8s_regional" {
   name = var.cluster_name
   network_id = var.vpc_network_id
   folder_id = var.folder_id
+  
   master {
     version =var.k8s_version
+    public_ip = true
     regional {
       region = "ru-central1"
       dynamic "location" {
@@ -30,17 +32,17 @@ resource "yandex_kubernetes_cluster" "k8s-regional" {
         }
       }
     }
-    security_group_ids = [yandex_vpc_security_group.k8s-main-sg.id]
+    security_group_ids = [yandex_vpc_security_group.k8s_main_sg.id]
   }
   service_account_id      = yandex_iam_service_account.myaccount.id
   node_service_account_id = yandex_iam_service_account.myaccount.id
   depends_on = [
-    yandex_resourcemanager_folder_iam_binding.k8s-clusters-agent,
-    yandex_resourcemanager_folder_iam_binding.vpc-public-admin,
-    yandex_resourcemanager_folder_iam_binding.images-puller
+    yandex_resourcemanager_folder_iam_binding.k8s_clusters_agent,
+    yandex_resourcemanager_folder_iam_binding.vpc_public_admin,
+    yandex_resourcemanager_folder_iam_binding.images_puller
   ]
   kms_provider {
-    key_id = yandex_kms_symmetric_key.kms-key.id
+    key_id = yandex_kms_symmetric_key.kms_key.id
   }
   labels = module.labels.labels
 
@@ -52,7 +54,7 @@ resource "yandex_kubernetes_cluster" "k8s-regional" {
 }
 
 resource "yandex_kubernetes_node_group" "node_group" {
-  cluster_id  = "${yandex_kubernetes_cluster.k8s-regional.id}"
+  cluster_id  = "${yandex_kubernetes_cluster.k8s_regional.id}"
   name        = "${var.cluster_name}-node-group"
   description = "${var.cluster_name}-node-group"
   version     = var.k8s_version
@@ -67,7 +69,7 @@ resource "yandex_kubernetes_node_group" "node_group" {
     network_interface {
       nat                = true
       subnet_ids         = var.node_subnets.*.id
-      security_group_ids = [ yandex_vpc_security_group.k8s-main-sg.id ]
+      security_group_ids = [ yandex_vpc_security_group.k8s_main_sg.id ]
     }
 
 
@@ -131,8 +133,7 @@ resource "yandex_iam_service_account" "myaccount" {
   description = "${var.cluster_name} regional service account"
 }
 
-resource "yandex_resourcemanager_folder_iam_binding" "k8s-clusters-agent" {
-  # The service account is assigned the k8s.clusters.agent role.
+resource "yandex_resourcemanager_folder_iam_binding" "k8s_clusters_agent" {
   folder_id = var.folder_id
   role      = "k8s.clusters.agent"
   members = [
@@ -140,8 +141,7 @@ resource "yandex_resourcemanager_folder_iam_binding" "k8s-clusters-agent" {
   ]
 }
 
-resource "yandex_resourcemanager_folder_iam_binding" "vpc-public-admin" {
-  # The service account is assigned the vpc.publicAdmin role.
+resource "yandex_resourcemanager_folder_iam_binding" "vpc_public_admin" {
   folder_id = var.folder_id
   role      = "vpc.publicAdmin"
   members = [
@@ -149,8 +149,7 @@ resource "yandex_resourcemanager_folder_iam_binding" "vpc-public-admin" {
   ]
 }
 
-resource "yandex_resourcemanager_folder_iam_binding" "images-puller" {
-  # The service account is assigned the container-registry.images.puller role.
+resource "yandex_resourcemanager_folder_iam_binding" "images_puller" {
   folder_id = var.folder_id
   role      = "container-registry.images.puller"
   members = [
@@ -158,7 +157,7 @@ resource "yandex_resourcemanager_folder_iam_binding" "images-puller" {
   ]
 }
 
-resource "yandex_kms_symmetric_key" "kms-key" {
+resource "yandex_kms_symmetric_key" "kms_key" {
   # A key for encrypting critical information, including passwords, OAuth tokens, and SSH keys.
   name              = "${var.cluster_name}-kms-key"
   default_algorithm = "AES_128"
@@ -168,14 +167,14 @@ resource "yandex_kms_symmetric_key" "kms-key" {
 }
 
 resource "yandex_kms_symmetric_key_iam_binding" "viewer" {
-  symmetric_key_id = yandex_kms_symmetric_key.kms-key.id
+  symmetric_key_id = yandex_kms_symmetric_key.kms_key.id
   role             = "viewer"
   members = [
     "serviceAccount:${yandex_iam_service_account.myaccount.id}",
   ]
 }
 
-resource "yandex_vpc_security_group" "k8s-main-sg" {
+resource "yandex_vpc_security_group" "k8s_main_sg" {
   name        = "${var.cluster_name}-main-sg"
   description = "Group rules ensure the basic performance of the cluster. Apply it to the cluster and node groups."
   network_id  = var.vpc_network_id
@@ -195,13 +194,13 @@ resource "yandex_vpc_security_group" "k8s-main-sg" {
     from_port         = 0
     to_port           = 65535
   }
-  # ingress {
-  #   protocol          = "ANY"
-  #   description       = "Rule allows pod-pod and service-service communication. Specify the subnets of your cluster and services."
-  #   v4_cidr_blocks    = concat(concat(var.node_subnets.*.v4_cidr_blocks))
-  #   from_port         = 0
-  #   to_port           = 65535
-  # }
+  ingress {
+    protocol          = "ANY"
+    description       = "Rule allows pod-pod and service-service communication. Specify the subnets of your cluster and services."
+    v4_cidr_blocks    = ["10.96.0.0/16", "10.112.0.0/16"]
+    from_port         = 0
+    to_port           = 65535
+  }
   ingress {
     protocol          = "ICMP"
     description       = "Rule allows debugging ICMP packets from internal subnets."
@@ -227,5 +226,26 @@ resource "yandex_vpc_security_group" "k8s-main-sg" {
     v4_cidr_blocks    = ["0.0.0.0/0"]
     from_port         = 0
     to_port           = 65535
+  }
+  ingress {
+    protocol          = "ANY"
+    description       = "Rule allows all incoming traffic"
+    v4_cidr_blocks    = ["0.0.0.0/0"]
+    from_port         = 0
+    to_port           = 65535
+  }
+  ingress {
+    protocol          = "TCP"
+    description       = "Rules to access the Kubernetes API"
+    v4_cidr_blocks    = ["0.0.0.0/0"]
+    from_port         = 443
+    to_port           = 443
+  }
+  ingress {
+    protocol          = "TCP"
+    description       = "Rules to access the Kubernetes API"
+    v4_cidr_blocks    = ["0.0.0.0/0"]
+    from_port         = 6443
+    to_port           = 6443
   }
 }

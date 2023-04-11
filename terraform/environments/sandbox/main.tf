@@ -11,4 +11,6 @@ module "interview-task-1" {
     cloud_id = local.cloud_id
 
     environment = "sbx"
+    domain = "palkin.nl"
 }
+
