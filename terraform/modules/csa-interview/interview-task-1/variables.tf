@@ -5,7 +5,8 @@ variable "environment" {
 
 variable "folder_id" {
   type = string
-  description = "(Required) The id of the folder for the resources to be deployed to"
+  description = "(Optional) The id of the folder for the resources to be deployed to. If not provided - new folder will be created"
+  default = ""
 }
 
 variable "cloud_id" {

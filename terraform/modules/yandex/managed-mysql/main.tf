@@ -18,6 +18,8 @@ terraform {
 }
 
 resource "yandex_mdb_mysql_cluster" "main" {
+  folder_id = var.folder_id
+
   name        = var.cluster_name
   environment = "PRODUCTION"
   network_id  = var.vpc_network_id
@@ -60,6 +62,7 @@ resource "yandex_mdb_mysql_database" "service" {
 }
 
 resource "yandex_kms_symmetric_key" "kms-key" {
+  folder_id = var.folder_id
   name              = "${var.environment}-${var.app_name}-secret-kms-key"
   default_algorithm = "AES_128"
   rotation_period   = "8760h" # 1 year.
@@ -68,6 +71,7 @@ resource "yandex_kms_symmetric_key" "kms-key" {
 }
 
 resource "yandex_lockbox_secret" "admin_password" {
+  folder_id = var.folder_id
   name = "${var.environment}-${var.app_name}-admin-password"
   kms_key_id = yandex_kms_symmetric_key.kms-key.id
 

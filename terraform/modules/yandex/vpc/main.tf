@@ -22,11 +22,13 @@ resource "yandex_vpc_network" "network" {
 }
 
 resource "yandex_vpc_gateway" "egress-gateway" {
+  folder_id = var.folder_id
   name = "egress-gateway"
   shared_egress_gateway {}
 }
 
 resource "yandex_vpc_route_table" "default" {
+  folder_id = var.folder_id
   network_id = yandex_vpc_network.network.id
 
   static_route {
@@ -38,6 +40,8 @@ resource "yandex_vpc_route_table" "default" {
 resource "yandex_vpc_subnet" "subnet" {
   count = length(var.subnets)
 
+  folder_id = var.folder_id
+  
   v4_cidr_blocks = var.subnets[count.index].v4_cidr_blocks
   zone           = var.subnets[count.index].zone
   network_id     = yandex_vpc_network.network.id

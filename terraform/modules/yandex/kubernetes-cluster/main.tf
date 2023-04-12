@@ -54,6 +54,7 @@ resource "yandex_kubernetes_cluster" "k8s_regional" {
 }
 
 resource "yandex_kubernetes_node_group" "node_group" {
+
   cluster_id  = "${yandex_kubernetes_cluster.k8s_regional.id}"
   name        = "${var.cluster_name}-node-group"
   description = "${var.cluster_name}-node-group"
@@ -129,6 +130,8 @@ resource "yandex_kubernetes_node_group" "node_group" {
 
 
 resource "yandex_iam_service_account" "myaccount" {
+  folder_id = var.folder_id
+
   name        = "${var.cluster_name}-sa"
   description = "${var.cluster_name} regional service account"
 }
@@ -159,6 +162,8 @@ resource "yandex_resourcemanager_folder_iam_binding" "images_puller" {
 
 resource "yandex_kms_symmetric_key" "kms_key" {
   # A key for encrypting critical information, including passwords, OAuth tokens, and SSH keys.
+  folder_id = var.folder_id
+  
   name              = "${var.cluster_name}-kms-key"
   default_algorithm = "AES_128"
   rotation_period   = "8760h" # 1 year.
@@ -175,6 +180,7 @@ resource "yandex_kms_symmetric_key_iam_binding" "viewer" {
 }
 
 resource "yandex_vpc_security_group" "k8s_main_sg" {
+  folder_id = var.folder_id
   name        = "${var.cluster_name}-main-sg"
   description = "Group rules ensure the basic performance of the cluster. Apply it to the cluster and node groups."
   network_id  = var.vpc_network_id
@@ -248,4 +254,17 @@ resource "yandex_vpc_security_group" "k8s_main_sg" {
     from_port         = 6443
     to_port           = 6443
   }
+}
+
+
+
+resource "null_resource" "auth_kubectl" {
+  triggers = {
+    cluster_id = yandex_kubernetes_cluster.k8s_regional.id
+  }
+
+  provisioner "local-exec" {
+    command = "yc managed-kubernetes cluster get-credentials ${var.cluster_name} --external --force"
+  }
+
 }

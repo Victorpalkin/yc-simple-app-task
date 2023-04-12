@@ -21,3 +21,7 @@ output "cluster_service_account_id" {
 output "cluster_security_group_id" {
   value = yandex_vpc_security_group.k8s_main_sg.id
 }
+
+output "kubectl_config_map" {
+  value = "~/.kube/config"
+}

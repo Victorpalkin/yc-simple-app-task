@@ -69,12 +69,15 @@ resource "yandex_resourcemanager_folder_iam_binding" "compute_viewer" {
 }
 
 resource "yandex_iam_service_account_static_access_key" "sa-static-key" {
+  
   service_account_id = yandex_iam_service_account.account.id
   description        = "Static Access key for ingress controller"
 }
 
 resource "yandex_vpc_security_group" "alb_main_sg" {
   name        = "alb-sg"
+  folder_id = var.folder_id
+  
   description = "Group rules ensure the basic performance of ALB"
   network_id  = var.vpc_network_id
 
@@ -111,18 +114,6 @@ resource "yandex_vpc_security_group" "alb_main_sg" {
 }
 
 
-
-resource "null_resource" "auth_kubectl" {
-  triggers = {
-    cluster_id = var.cluster_id
-  }
-
-  provisioner "local-exec" {
-    command = "yc managed-kubernetes cluster get-credentials ${var.cluster_name} --external --force"
-  }
-
-}
-
 resource "null_resource" "get_key" {
   triggers = {
     cluster_id = var.cluster_id
@@ -131,9 +122,6 @@ resource "null_resource" "get_key" {
   provisioner "local-exec" {
     command = "yc iam key create --service-account-name ${yandex_iam_service_account.account.name} --output sa-key.json"
   }
-  depends_on = [
-    null_resource.auth_kubectl
-  ]
 }
 
 resource "null_resource" "install_ingress" {

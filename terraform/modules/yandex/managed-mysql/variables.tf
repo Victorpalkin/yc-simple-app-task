@@ -3,6 +3,11 @@ variable "environment" {
   description = "(Required) Deployment environment (Sandbox, dev, qa, prod)"
 }
 
+variable "folder_id" {
+  type = string
+  description = "(Required) The id of the folder for the resources to be deployed to"
+}
+
 variable "vpc_network_id" {
   type = string
   description = "(Required) The ID of the VPC for the MySQL instance"
