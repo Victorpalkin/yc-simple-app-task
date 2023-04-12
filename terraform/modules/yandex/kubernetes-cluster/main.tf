@@ -14,8 +14,12 @@ module "labels" {
     environment = var.environment
 }
 
+resource "random_id" "cluster_id" {
+  byte_length = 3
+}
+
 resource "yandex_kubernetes_cluster" "k8s_regional" {
-  name = var.cluster_name
+  name = "${var.cluster_name}-${random_id.cluster_id.dec}"
   network_id = var.vpc_network_id
   folder_id = var.folder_id
   
@@ -263,7 +267,7 @@ resource "null_resource" "auth_kubectl" {
   }
 
   provisioner "local-exec" {
-    command = "yc managed-kubernetes cluster get-credentials ${var.cluster_name} --external --force"
+    command = "yc managed-kubernetes cluster get-credentials ${yandex_kubernetes_cluster.k8s_regional.name} --external --force"
   }
 
 }

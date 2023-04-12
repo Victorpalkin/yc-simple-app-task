@@ -14,8 +14,12 @@ module "labels" {
     environment = var.environment
 }
 
+resource "random_id" "vpc_id" {
+  byte_length = 3
+}
+
 resource "yandex_vpc_network" "network" {
-  name = var.vpc_name
+  name = "${var.vpc_name}-${random_id.vpc_id.dec}"
   folder_id = var.folder_id
 
   labels = module.labels.labels

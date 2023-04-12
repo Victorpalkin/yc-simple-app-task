@@ -44,10 +44,14 @@ data "archive_file" "zip_function" {
   output_file_mode = "0666"
 }
 
+resource "random_id" "function_id" {
+  byte_length = 3
+}
+
 resource "yandex_function" "sink_function" {
   folder_id = var.folder_id
 
-  name               = var.function_name
+  name               = "${var.function_name}-${random_id.function_id.dec}"
   description        = var.function_description
   user_hash          = data.archive_file.zip_function.output_sha
   runtime            = "python37"
@@ -68,6 +72,7 @@ resource "yandex_function" "sink_function" {
     "DB_PORT" = var.db_port,
     "DB_HOSTNAME" = var.db_hostname,
     "DB_NAME" = var.db_name
+    "VERBOSE_LOG" = "True"
   }
 
 
@@ -76,13 +81,23 @@ resource "yandex_function" "sink_function" {
   }
 }
 
+resource "random_id" "trigger_id" {
+  byte_length = 3
+}
+
 resource "yandex_function_trigger" "alb_trigger" {
-  name        = "some_name"
-  description = "any description"
-  timer {
-    cron_expression = "* * * * ? *"
-  }
+  folder_id = var.folder_id
+
+  name        = "alb-trigger-${random_id.trigger_id.dec}"
+  description = "The trigger from the load balancer log group sink"
+  
   function {
-    id = "tf-test"
+    id = yandex_function.sink_function.id
+    service_account_id = yandex_iam_service_account.account.id
+  }
+  log_group {
+    id = var.load_balancer_log_group_id
+    batch_size = 10
+    batch_cutoff = "15s"
   }
 }
