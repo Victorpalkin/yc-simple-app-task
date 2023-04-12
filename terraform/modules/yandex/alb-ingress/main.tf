@@ -124,6 +124,20 @@ resource "null_resource" "get_key" {
   }
 }
 
+resource "null_resource" "sleep" {
+  triggers = {
+    cluster_id = var.cluster_id
+  }
+
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+  depends_on = [
+    null_resource.get_key
+  ]
+
+}
+
 resource "null_resource" "install_ingress" {
   triggers = {
     cluster_id = var.cluster_id
@@ -134,7 +148,7 @@ resource "null_resource" "install_ingress" {
   }
 
   depends_on = [
-    null_resource.get_key
+    null_resource.sleep
   ]
 
 }

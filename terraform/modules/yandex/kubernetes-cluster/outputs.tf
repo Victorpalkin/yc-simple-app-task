@@ -10,6 +10,10 @@ output "cluster_endpoint" {
   value = yandex_kubernetes_cluster.k8s_regional.master[0].external_v4_endpoint
 }
 
+output "cluster_address" {
+  value = yandex_kubernetes_cluster.k8s_regional.master[0].external_v4_address
+}
+
 output "ca_certificate" {
   value = yandex_kubernetes_cluster.k8s_regional.master[0].cluster_ca_certificate
 }

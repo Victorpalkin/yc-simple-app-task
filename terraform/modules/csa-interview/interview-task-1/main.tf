@@ -129,7 +129,13 @@ module "dns"{
 
 
 provider "kubernetes" {
-  config_path = module.k8s_cluster.kubectl_config_map
+  host = module.k8s_cluster.cluster_endpoint
+  cluster_ca_certificate = module.k8s_cluster.ca_certificate
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args = ["managed-kubernetes", "create-token"]
+    command     = "yc"
+  }
 }
 
 

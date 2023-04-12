@@ -257,7 +257,6 @@ resource "yandex_vpc_security_group" "k8s_main_sg" {
 }
 
 
-
 resource "null_resource" "auth_kubectl" {
   triggers = {
     cluster_id = yandex_kubernetes_cluster.k8s_regional.id
