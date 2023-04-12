@@ -24,6 +24,7 @@ It works through the Application Load Balancer and Kubernetes Ingress Controller
 ### Next steps
 1. Separate of setting the landing zone resources and app resources into two different terraform templates
     1.1 Landing Zone resources - k8s cluster, databased cluster, DNS zone, container registry, IAM roles, VPC, security groups
+2. Implement the storage of the state file on Object storage with state lock
 2. Implement the usage of container registry
 3. Implement the application to write to MySQL database (currently commented out)
 4. Implement the sink of application load balancer logs to the MySQL database

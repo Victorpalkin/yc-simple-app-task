@@ -135,17 +135,6 @@ module "dns"{
   }]
 }
 
-data "template_file" "k8s" {
-  template = "${file("${path.module}/k8stemplate.yml")}"
-
-  vars = {
-    subnet_ids = join(",", module.network.subnets.*.id)
-    security_group_ids = join(",", [ module.k8s_cluster.cluster_security_group_id, module.alb_ingress.security_group_id ])
-    external_ip_adress  = module.alb_ingress.external_ip
-    host = "${var.domain}"
-  }
-}
-
 
 provider "kubernetes" {
   config_path = module.k8s_cluster.kubectl_config_map
