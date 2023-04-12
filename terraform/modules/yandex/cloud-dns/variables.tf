@@ -10,7 +10,14 @@ variable "folder_id" {
 
 variable "domain" {
   type = string
-  description = "(Required)The domain name for the public zone to be created"
+  description = "(Optional)The domain name for the public zone to be created. Use only if you want to create a zone"
+  default = ""
+}
+
+variable "zone_id" {
+  type = string
+  description = "(Optional) The existing zone to create a record in."
+  default = ""
 }
 
 variable "records" {
@@ -20,6 +27,6 @@ variable "records" {
         data = list(string)
         ttl = string
     }))
-    description = "(Optional)The domain name for the public zone to be created"
+    description = "(Optional)The domain name for the public zone to be created. Only if you want to create the records"
     default = [ ]
 }

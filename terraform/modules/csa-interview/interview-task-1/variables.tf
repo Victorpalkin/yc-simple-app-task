@@ -38,9 +38,9 @@ variable "k8s_version" {
   default = "1.23"
 }
 
-variable "domain" {
+variable "host" {
   type = string
-  description = "(Required) The domain registered for the application. Should be delegated to Yandex"
+  description = "(Required) The host for the application"
 }
 
 variable "certificate_id" {
@@ -48,3 +48,12 @@ variable "certificate_id" {
   description = "(Required) The ID of the certificate for the https tls access. Create it and validate it before the deployment"
 }
 
+variable "dns_zone_id" {
+  type = string
+  description = "(Required) The existing DNS zone to create a record at"
+}
+
+variable "container_registry_id" {
+  type = string
+  description = "(Required) The container registry id where the application containers are located"
+}

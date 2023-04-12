@@ -3,7 +3,7 @@ output "external_ip_adress" {
 }
 
 output "app_host" {
-    value = var.domain
+    value = var.host
 }
 
 output "load_balancer"{

@@ -16,6 +16,8 @@ module "labels" {
 }
 
 resource "yandex_dns_zone" "zone" {
+  count = var.domain == "" ? 0 : 1
+  
   folder_id = var.folder_id
   
   name        = "dns-public-zone"
@@ -30,7 +32,7 @@ resource "yandex_dns_zone" "zone" {
 
 resource "yandex_dns_recordset" "set" {
   count = length(var.records)
-  zone_id = yandex_dns_zone.zone.id
+  zone_id = var.zone_id
   name    = var.records[count.index].name
   type    = var.records[count.index].type
   ttl     = var.records[count.index].ttl

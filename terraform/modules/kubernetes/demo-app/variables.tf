@@ -28,3 +28,8 @@ variable "certificate_id" {
   type = string
   description = "(Required) The certificate id in certificate manager for TLS"
 }
+
+variable "container_registry_id" {
+  type = string
+  description = "(Required) The container registry id where the applications are located"
+}

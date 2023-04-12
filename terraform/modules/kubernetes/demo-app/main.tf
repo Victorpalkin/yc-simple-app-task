@@ -13,37 +13,37 @@ resource "kubernetes_namespace" "space" {
   }
 }
 
-resource "kubernetes_config_map" "demo_app_1" {
-  metadata {
-    name = "alb-demo-1"
-    namespace = kubernetes_namespace.space.metadata.0.name
-  }
+# resource "kubernetes_config_map" "demo_app_1" {
+#   metadata {
+#     name = "alb-demo-1"
+#     namespace = kubernetes_namespace.space.metadata.0.name
+#   }
 
-  data = {
-    "nginx.conf" = <<-EOT
-    worker_processes auto;
-    events {
-    }
-    http {
-      server {
-        listen 80 ;
-        location = /_healthz {
-          add_header Content-Type text/plain;
-          return 200 'ok';
-        }
-        location / {
-          add_header Content-Type text/plain;
-          return 200 'Index';
-        }
-        location = /app1 {
-          add_header Content-Type text/plain;
-          return 200 'This is APP#1';
-        }
-      }
-    }
-  EOT
-  }
-}
+#   data = {
+#     "nginx.conf" = <<-EOT
+#     worker_processes auto;
+#     events {
+#     }
+#     http {
+#       server {
+#         listen 80 ;
+#         location = /_healthz {
+#           add_header Content-Type text/plain;
+#           return 200 'ok';
+#         }
+#         location / {
+#           add_header Content-Type text/plain;
+#           return 200 'Index';
+#         }
+#         location = /app1 {
+#           add_header Content-Type text/plain;
+#           return 200 'This is APP#1';
+#         }
+#       }
+#     }
+#   EOT
+#   }
+# }
 
 
 resource "kubernetes_deployment" "demo_app_1" {
@@ -78,14 +78,14 @@ resource "kubernetes_deployment" "demo_app_1" {
       }
       spec {
         termination_grace_period_seconds = 5
-        volume {
-          name = "alb-demo-1"
-          config_map {
-            name = "alb-demo-1"
-          }
-        }
+        # volume {
+        #   name = "alb-demo-1"
+        #   config_map {
+        #     name = "alb-demo-1"
+        #   }
+        # }
         container {
-          image = "nginx:latest"
+          image = "cr.yandex/${var.container_registry_id}/demo-app-1:v1"
           name  = "alb-demo-1"
           port {
             name = "http"
@@ -100,11 +100,11 @@ resource "kubernetes_deployment" "demo_app_1" {
             timeout_seconds = 2
             failure_threshold = 2
           }
-          volume_mount {
-            name = "alb-demo-1"
-            mount_path = "/etc/nginx"
-            read_only = true
-          }
+          # volume_mount {
+          #   name = "alb-demo-1"
+          #   mount_path = "/etc/nginx"
+          #   read_only = true
+          # }
           resources {
             limits = {
                 cpu = "250m"
@@ -141,37 +141,37 @@ resource "kubernetes_service" "demo_app_1" {
   }
 }
 
-resource "kubernetes_config_map" "demo_app_2" {
-  metadata {
-    namespace = kubernetes_namespace.space.metadata.0.name
-    name = "alb-demo-2"
-  }
+# resource "kubernetes_config_map" "demo_app_2" {
+#   metadata {
+#     namespace = kubernetes_namespace.space.metadata.0.name
+#     name = "alb-demo-2"
+#   }
 
-  data = {
-    "nginx.conf" = <<-EOT
-    worker_processes auto;
-    events {
-    }
-    http {
-      server {
-        listen 80 ;
-        location = /_healthz {
-          add_header Content-Type text/plain;
-          return 200 'ok';
-        }
-        location / {
-          add_header Content-Type text/plain;
-          return 200 'Add app#';
-        }
-        location = /app2 {
-          add_header Content-Type text/plain;
-          return 200 'This is APP#2';
-        }
-      }
-    }
-  EOT
-  }
-}
+#   data = {
+#     "nginx.conf" = <<-EOT
+#     worker_processes auto;
+#     events {
+#     }
+#     http {
+#       server {
+#         listen 80 ;
+#         location = /_healthz {
+#           add_header Content-Type text/plain;
+#           return 200 'ok';
+#         }
+#         location / {
+#           add_header Content-Type text/plain;
+#           return 200 'Add app#';
+#         }
+#         location = /app2 {
+#           add_header Content-Type text/plain;
+#           return 200 'This is APP#2';
+#         }
+#       }
+#     }
+#   EOT
+#   }
+# }
 
 resource "kubernetes_deployment" "demo_app_2" {
   metadata {
@@ -205,14 +205,14 @@ resource "kubernetes_deployment" "demo_app_2" {
       }
       spec {
         termination_grace_period_seconds = 5
-        volume {
-          name = "alb-demo-2"
-          config_map {
-            name = "alb-demo-2"
-          }
-        }
+        # volume {
+        #   name = "alb-demo-2"
+        #   config_map {
+        #     name = "alb-demo-2"
+        #   }
+        # }
         container {
-          image = "nginx:latest"
+          image = "cr.yandex/${var.container_registry_id}/demo-app-2:v1"
           name  = "alb-demo-2"
           port {
             name = "http"
@@ -227,11 +227,11 @@ resource "kubernetes_deployment" "demo_app_2" {
             timeout_seconds = 2
             failure_threshold = 2
           }
-          volume_mount {
-            name = "alb-demo-2"
-            mount_path = "/etc/nginx"
-            read_only = true
-          }
+          # volume_mount {
+          #   name = "alb-demo-2"
+          #   mount_path = "/etc/nginx"
+          #   read_only = true
+          # }
           resources {
             limits = {
                 cpu = "250m"

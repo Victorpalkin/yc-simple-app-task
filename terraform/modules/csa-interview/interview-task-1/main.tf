@@ -81,14 +81,6 @@ module "k8s_cluster" {
     ]
 }
 
-module "registry" {
-  source = "../../yandex/container-registry"
-
-  registry_name = "demo-registry"
-  environment = var.environment
-  folder_id = local.folder_id
-}
-
 module "alb_ingress" {
   source = "../../yandex/alb-ingress"
 
@@ -125,7 +117,7 @@ module "dns"{
   environment = var.environment
   folder_id = local.folder_id
 
-  domain = var.domain
+  zone_id = var.dns_zone_id
 
   records = [{
     name = "@"
@@ -148,8 +140,9 @@ module "demo_app_deployment" {
   subnet_ids = join(",", module.network.subnets.*.id)
   security_group_ids = join(",", [ module.k8s_cluster.cluster_security_group_id, module.alb_ingress.security_group_id ])
   external_ip_adress = module.alb_ingress.external_ip
-  host = var.domain
+  host = var.host
   certificate_id = var.certificate_id
+  container_registry_id = var.container_registry_id
   
   depends_on = [
     module.alb_ingress
