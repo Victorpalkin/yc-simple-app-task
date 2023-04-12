@@ -16,20 +16,33 @@ It works through the Application Load Balancer and Kubernetes Ingress Controller
 5. Authorize yandex.cloud CLI with `yc init --federation-id=bpfn9q9caodsckrtpi05`
 6. Run Windows:`$Env:YC_TOKEN=$(yc iam create-token)`, Linux - `export YC_TOKEN=$(yc iam create-token)` to get the authorization token for terraform
 7. Deploy common services (Cloud DNS zone and Container Registry) 
+    
     7.1 `cd terraform/common-services`
+
     7.2 Maintain local variables in `main.tf`
+    
     7.3 `terraform apply`
+    
     7.4 Write down the container "registry_id" and "dns_zone_id" from the terraform output
+    
     7.5 Configure Docker to use `docker-credential-yc` via `yc container registry configure-docker`
 8. Build the container images and push them to container registry
+    
     8.1 `cd ../../` to return to the root
+    
     8.2 `docker build -t cr.yandex/<registry_id>/demo-app-1:v1 apps/demo-app-1` 
+    
     8.3 `docker push cr.yandex/<registry_id>/demo-app-1:v1`
+    
     8.4 `docker build -t cr.yandex/<registry_id>/demo-app-2:v1 apps/demo-app-2`
+    
     8.5 `docker push cr.yandex/<registry_id>/demo-app-2:v1`
 9. Deploy the application via terraform
+    
     9.1 cd `terraform/demo-app/sandbox`
+    
     9.2 Maintain local variables in `main.tf`
+    
     9.3 `terraform apply`
 
 
@@ -39,6 +52,7 @@ It works through the Application Load Balancer and Kubernetes Ingress Controller
 
 ### Next steps
 1. Separate of setting the landing zone resources and app resources into two different terraform templates
+
     1.1 Landing Zone resources - k8s cluster, databased cluster, DNS zone, container registry, IAM roles, VPC, security groups
 2. Implement the storage of the state file on Object storage with state lock
 2. Implement the usage of container registry
