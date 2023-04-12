@@ -43,3 +43,8 @@ variable "domain" {
   description = "(Required) The domain registered for the application. Should be delegated to Yandex"
 }
 
+variable "certificate_id" {
+  type = string
+  description = "(Required) The ID of the certificate for the https tls access. Create it and validate it before the deployment"
+}
+

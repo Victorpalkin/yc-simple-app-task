@@ -160,7 +160,7 @@ module "demo_app_deployment" {
   security_group_ids = join(",", [ module.k8s_cluster.cluster_security_group_id, module.alb_ingress.security_group_id ])
   external_ip_adress = module.alb_ingress.external_ip
   host = var.domain
-  certificate_id = "fpqheas4dpk0uc0jkdu8"
+  certificate_id = var.certificate_id
   
   depends_on = [
     module.alb_ingress
