@@ -13,7 +13,7 @@ It works through the Application Load Balancer and Kubernetes Ingress Controller
 3. Install terraform
 4. Install helm (required to install Ingress controller)
 5. Create the certificate in Yandex cloud certificate manager for the required domain. Provide it as a variable in the root module
-5. Authorize yandex.cloud CLI with `yc init --federation-id=bpfn9q9caodsckrtpi05`
+5. Authorize yandex.cloud CLI with `yc init --federation-id=<federation_id>`
 6. Run Windows:`$Env:YC_TOKEN=$(yc iam create-token)`, Linux - `export YC_TOKEN=$(yc iam create-token)` to get the authorization token for terraform
 7. Deploy common services (Cloud DNS zone and Container Registry) 
     
